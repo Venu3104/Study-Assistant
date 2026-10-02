@@ -12,9 +12,12 @@ def display_menu():
     print("5. Add Task")
     print("6. View Tasks")
     print("7. Mark as completed")
-    print("8. Exit")
-    
-    
+    print("8. Delete Subject")
+    print("9. Delete Topic")
+    print("10. Delete Task")
+    print("11. Exit")
+
+
 def add_subject():
     subject_name=input("Enter the subject name: ")
     
@@ -186,6 +189,53 @@ def mark_task_completed():
 
     print(f"Task '{tasks[task_number - 1]['name']}' marked as completed!")
     
+    
+    
+
+def delete_subject():
+    subject_name= input("Enter the subject name to delete: ")
+    if subject_name not in subjects:
+        print("Subject not found. Please add the subject first.")
+        return
+    subjects.pop(subject_name)
+    print(f"subject '{subject_name}' and all its topics and tasks have been deleted successfully!")
+    
+    
+
+def delete_topic():
+    subject_name= input("Enter the subject name to delete a topic: ")
+    if subject_name not in subjects:
+        print("Subject not found. Please add the subject first.")
+        return
+    topic_name= input("Enter the topic name to delete: ")
+    if topic_name not in subjects[subject_name]:
+        print("Topic not found. Please add the topic first.")
+        return
+    subjects[subject_name].pop(topic_name)
+    print(f"Topic '{topic_name}' and all its tasks have been deleted successfully from subject '{subject_name}'!")
+    
+    
+def delete_task():
+    subject_name= input("Enter the subject name to delete a task: ")
+    if subject_name not in subjects:
+        print("Subject not found. Please add the subject first.")
+        return
+    topic_name= input("Enter the topic name to delete a task: ")
+    if topic_name not in subjects[subject_name]:
+        print("Topic not found. Please add the topic first.")
+        return
+    task_name= input("Enter the task name to delete: ")
+    tasks=subjects[subject_name][topic_name]
+    for task in tasks:
+        if task["name"]==task_name:
+            tasks.remove(task)
+            print(f"Task '{task_name}' has been deleted successfully from topic '{topic_name}' in subject '{subject_name}'!")
+            return
+    print(f"Task '{task_name}' not found in topic '{topic_name}'.")
+    
+        
+    
+    
              
             
 while True:
@@ -207,6 +257,12 @@ while True:
     elif choice=="7":
         mark_task_completed()
     elif choice=="8":
+        delete_subject()
+    elif choice=="9":
+        delete_topic()
+    elif choice=="10":
+        delete_task()
+    elif choice=="11":
         print("Thank you for using the study assistant.")
         break
     else:
