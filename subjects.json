@@ -1,0 +1,18 @@
+{
+    "python": {
+        "oops": [
+            {
+                "name": "inheritance",
+                "completed": false
+            },
+            {
+                "name": "abstraction",
+                "completed": true
+            },
+            {
+                "name": "polymorphism",
+                "completed": false
+            }
+        ]
+    }
+}

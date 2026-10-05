@@ -1,4 +1,23 @@
+import json
 subjects={}
+
+def save_data():
+    with open("subjects.json","w") as file:
+            json.dump(subjects,file,indent=4)
+            
+            
+def load_data():
+    global subjects
+    
+    try:
+        with open("subjects.json","r") as file:
+            subjects=json.load(file)
+    
+    except FileNotFoundError:
+        subjects = {}
+        
+
+load_data()
 
 
 def display_menu():
@@ -233,10 +252,9 @@ def delete_task():
             return
     print(f"Task '{task_name}' not found in topic '{topic_name}'.")
     
-        
     
-    
-             
+
+            
             
 while True:
     display_menu()
@@ -263,6 +281,8 @@ while True:
     elif choice=="10":
         delete_task()
     elif choice=="11":
+        save_data()
+        print("Data saved to subjects.json.")
         print("Thank you for using the study assistant.")
         break
     else:
