@@ -1,28 +1,29 @@
 import json
-subjects={}
+
+subjects = {}
+
 
 def save_data():
-    with open("subjects.json","w") as file:
-            json.dump(subjects,file,indent=4)
-            
-            
+    with open("subjects.json", "w") as file:
+        json.dump(subjects, file, indent=4)
+
+
 def load_data():
     global subjects
-    
+
     try:
-        with open("subjects.json","r") as file:
-            subjects=json.load(file)
-    
+        with open("subjects.json", "r") as file:
+            subjects = json.load(file)
     except FileNotFoundError:
         subjects = {}
-        
+
 
 load_data()
 
 
 def display_menu():
     print("\n===============================")
-    print("           STUDY ASSISTANT       ")
+    print("           STUDY ASSISTANT")
     print("===============================")
     print("1. Add Subject")
     print("2. View Subjects")
@@ -38,138 +39,220 @@ def display_menu():
 
 
 def add_subject():
-    subject_name=input("Enter the subject name: ")
-    
-    if subject_name in subjects:
-        print("subject already exists.")
+    subject_name = input("Enter the subject name: ").strip()
+
+    if subject_name == "":
+        print("Subject name cannot be empty.")
         return
-    
+
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            print("Subject already exists.")
+            return
+
     subjects[subject_name] = {}
-    
+
     print(f"{subject_name} added successfully!")
-    
+
+
 def view_subjects():
     if not subjects:
         print("No subjects added yet.")
         return
-    
-    print("\n Your Subjects:")
-    
-    for index, subject in enumerate(subjects,start=1):
-            print(f"{index}. {subject}") 
-            
-            
-            
+
+    print("\nYour Subjects:")
+
+    for index, subject in enumerate(subjects, start=1):
+        print(f"{index}. {subject}")
+
+
 def add_topic():
-    subject_name=input("Enter the subject name to add a topic: ")
-    
+    subject_name = input(
+        "Enter the subject name to add a topic: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
-    
-    topic_name=input("Enter the topic name: ")
-    
-    if topic_name in subjects[subject_name]:
-        print("Topic is already exist in this subject, Please enter a new topic name.")
+
+    topic_name = input("Enter the topic name: ").strip()
+
+    if topic_name == "":
+        print("Topic name cannot be empty.")
         return
-    
-    subjects[subject_name][topic_name]=[]
-    
-    print(f"Topic '{topic_name}' added to subject '{subject_name}' successfully!")
-    
-    
+
+    # Check for duplicate topic, ignoring case
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            print("Topic already exists in this subject. Please enter a new topic name.")
+            return
+
+    subjects[subject_name][topic_name] = []
+
+    print(
+        f"Topic '{topic_name}' added to subject "
+        f"'{subject_name}' successfully!"
+    )
+
 
 def view_topics():
-    subject_name=input("Enter the subject name to view topics: ")
-    
+    subject_name = input(
+        "Enter the subject name to view topics: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
-    
-    for subject, topics in subjects.items():
-        
-        if subject==subject_name:
-            if not topics:
-                print(f"No topics have been added for subject '{subject_name}'.")
-                return
-            
-            print(f"\nTopics for subject '{subject_name}':")
-            for index, topic in enumerate(topics, start=1):
-                print(f"{index}. {topic}")
-                
-             
-            
+
+    topics = subjects[subject_name]
+
+    if not topics:
+        print(f"No topics have been added for subject '{subject_name}'.")
+        return
+
+    print(f"\nTopics for subject '{subject_name}':")
+
+    for index, topic in enumerate(topics, start=1):
+        print(f"{index}. {topic}")
+
 
 def add_task():
-    subject_name=input("Enter the subject name to add a task: ")
-    
+    subject_name = input(
+        "Enter the subject name to add a task: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
-    
-    topic_name=input("Enter the topic name to add a task: ")
-    
+
+    topic_name = input(
+        "Enter the topic name to add a task: "
+    ).strip()
+
+    # Find the actual topic key, ignoring case
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            topic_name = topic
+            break
+
     if topic_name not in subjects[subject_name]:
         print("Topic not found. Please add the topic first.")
         return
-    
-    task_name=input("Enter the task name: ")
-    
+
+    task_name = input("Enter the task name: ").strip()
+
+    if task_name == "":
+        print("Task name cannot be empty.")
+        return
+
+    # Check for duplicate task, ignoring case
     for task in subjects[subject_name][topic_name]:
-        if task["name"] == task_name:
-            print("Task already exists in the topic. Please enter a new task name.")
+        if task["name"].lower() == task_name.lower():
+            print(
+                "Task already exists in the topic. "
+                "Please enter a new task name."
+            )
             return
-    
-    subjects[subject_name][topic_name].append({"name": task_name, "completed": False})
-    
-    print(f"Task '{task_name}' added to topic '{topic_name}' in subject '{subject_name}' successfully")
-    
-    
+
+    subjects[subject_name][topic_name].append({
+        "name": task_name,
+        "completed": False
+    })
+
+    print(
+        f"Task '{task_name}' added to topic '{topic_name}' "
+        f"in subject '{subject_name}' successfully"
+    )
 
 
 def view_tasks():
-    subject_name=input("Enter the subject name to view tasks: ")
-    
+    subject_name = input(
+        "Enter the subject name to view tasks: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
-    
-    for subject, topics in subjects.items():
-        
-        if subject==subject_name:
-            if not topics:
-                print(f"No topics have been added for subject '{subject_name}'.")
-                return
-            
-            print(f"\nTopics for subject '{subject_name}':")
-            for index, topic in enumerate(topics, start=1):
-                print(f"{index}. {topic}")
-                
-                tasks=subjects[subject][topic]
-                
-                if not tasks:
-                    print(f"  No tasks have been added for topic '{topic}'.")
+
+    topics = subjects[subject_name]
+
+    if not topics:
+        print(f"No topics have been added for subject '{subject_name}'.")
+        return
+
+    print(f"\nTopics for subject '{subject_name}':")
+
+    for index, topic in enumerate(topics, start=1):
+        print(f"{index}. {topic}")
+
+        tasks = topics[topic]
+
+        if not tasks:
+            print(f"  No tasks have been added for topic '{topic}'.")
+        else:
+            print(f"  Tasks for topic '{topic}':")
+
+            for task_index, task in enumerate(tasks, start=1):
+
+                if task["completed"]:
+                    status = "Completed"
                 else:
-                    print(f"  Tasks for topic '{topic}':")
-                    for task_index, task in enumerate(tasks, start=1):
-                        status=task["completed"]
-                        
-                        if status:
-                            status="Completed"
-                        else:
-                            status="Not Completed"
-                            
-                        print(f"    {task_index}. {task['name']} - {status}")
-                        
+                    status = "Not Completed"
+
+                print(
+                    f"    {task_index}. "
+                    f"{task['name']} - {status}"
+                )
+
 
 def mark_task_completed():
-    subject_name = input("Enter the subject name: ")
+    subject_name = input(
+        "Enter the subject name: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
 
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
 
-    topic_name = input("Enter the topic name: ")
+    topic_name = input(
+        "Enter the topic name: "
+    ).strip()
+
+    # Find the actual topic key, ignoring case
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            topic_name = topic
+            break
 
     if topic_name not in subjects[subject_name]:
         print("Topic not found. Please add the topic first.")
@@ -191,103 +274,182 @@ def mark_task_completed():
             status = "Not Completed"
 
         print(f"{index}. {task['name']} - {status}")
-        
+
     try:
-        task_number = int(input("Enter the task number to mark as completed: "))
+        task_number = int(
+            input("Enter the task number to mark as completed: ")
+        )
     except ValueError:
         print("Please enter a valid task number.")
         return
-        
 
-    if(task_number<1 or task_number>len(tasks)):
-        print("Invalid task number. please enter a valid task number.")
+    if task_number < 1 or task_number > len(tasks):
+        print("Invalid task number. Please enter a valid task number.")
         return
-        
 
     tasks[task_number - 1]["completed"] = True
 
-    print(f"Task '{tasks[task_number - 1]['name']}' marked as completed!")
-    
-    
-    
+    print(
+        f"Task '{tasks[task_number - 1]['name']}' "
+        f"marked as completed!"
+    )
+
 
 def delete_subject():
-    subject_name= input("Enter the subject name to delete: ")
+    subject_name = input(
+        "Enter the subject name to delete: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
     if subject_name not in subjects:
         print("Subject not found. Please add the subject first.")
         return
+
     subjects.pop(subject_name)
-    print(f"subject '{subject_name}' and all its topics and tasks have been deleted successfully!")
-    
-    
+
+    print(
+        f"Subject '{subject_name}' and all its topics "
+        f"and tasks have been deleted successfully!"
+    )
+
 
 def delete_topic():
-    subject_name= input("Enter the subject name to delete a topic: ")
-    if subject_name not in subjects:
-        print("Subject not found. Please add the subject first.")
-        return
-    topic_name= input("Enter the topic name to delete: ")
-    if topic_name not in subjects[subject_name]:
-        print("Topic not found. Please add the topic first.")
-        return
-    subjects[subject_name].pop(topic_name)
-    print(f"Topic '{topic_name}' and all its tasks have been deleted successfully from subject '{subject_name}'!")
-    
-    
-def delete_task():
-    subject_name= input("Enter the subject name to delete a task: ")
-    if subject_name not in subjects:
-        print("Subject not found. Please add the subject first.")
-        return
-    topic_name= input("Enter the topic name to delete a task: ")
-    if topic_name not in subjects[subject_name]:
-        print("Topic not found. Please add the topic first.")
-        return
-    task_name= input("Enter the task name to delete: ")
-    tasks=subjects[subject_name][topic_name]
-    for task in tasks:
-        if task["name"]==task_name:
-            tasks.remove(task)
-            print(f"Task '{task_name}' has been deleted successfully from topic '{topic_name}' in subject '{subject_name}'!")
-            return
-    print(f"Task '{task_name}' not found in topic '{topic_name}'.")
-    
-    
+    subject_name = input(
+        "Enter the subject name to delete a topic: "
+    ).strip()
 
-            
-            
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
+    if subject_name not in subjects:
+        print("Subject not found. Please add the subject first.")
+        return
+
+    topic_name = input(
+        "Enter the topic name to delete: "
+    ).strip()
+
+    # Find the actual topic key, ignoring case
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            topic_name = topic
+            break
+
+    if topic_name not in subjects[subject_name]:
+        print("Topic not found. Please add the topic first.")
+        return
+
+    subjects[subject_name].pop(topic_name)
+
+    print(
+        f"Topic '{topic_name}' and all its tasks have been "
+        f"deleted successfully from subject '{subject_name}'!"
+    )
+
+
+def delete_task():
+    subject_name = input(
+        "Enter the subject name to delete a task: "
+    ).strip()
+
+    # Find the actual subject key, ignoring case
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            subject_name = subject
+            break
+
+    if subject_name not in subjects:
+        print("Subject not found. Please add the subject first.")
+        return
+
+    topic_name = input(
+        "Enter the topic name to delete a task: "
+    ).strip()
+
+    # Find the actual topic key, ignoring case
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            topic_name = topic
+            break
+
+    if topic_name not in subjects[subject_name]:
+        print("Topic not found. Please add the topic first.")
+        return
+
+    task_name = input(
+        "Enter the task name to delete: "
+    ).strip()
+    
+    if task_name == "":
+        print("Task name cannot be empty.")
+        return
+
+    tasks = subjects[subject_name][topic_name]
+
+    for task in tasks:
+        if task["name"].lower() == task_name.lower():
+            tasks.remove(task)
+
+            print(
+                f"Task '{task_name}' has been deleted successfully "
+                f"from topic '{topic_name}' in subject "
+                f"'{subject_name}'!"
+            )
+            return
+
+    print(
+        f"Task '{task_name}' not found in topic '{topic_name}'."
+    )
+
+
 while True:
     display_menu()
-    choice=input("Enter your choice :")
-    
-    if choice=="1":
+
+    choice = input("Enter your choice: ").strip()
+
+    if choice == "1":
         add_subject()
-    elif choice=="2":
+
+    elif choice == "2":
         view_subjects()
-    elif choice=="3":
+
+    elif choice == "3":
         add_topic()
-    elif choice=="4":
+
+    elif choice == "4":
         view_topics()
-    elif choice=="5":
-        add_task()  
-    elif choice=="6":
+
+    elif choice == "5":
+        add_task()
+
+    elif choice == "6":
         view_tasks()
-    elif choice=="7":
+
+    elif choice == "7":
         mark_task_completed()
-    elif choice=="8":
+
+    elif choice == "8":
         delete_subject()
-    elif choice=="9":
+
+    elif choice == "9":
         delete_topic()
-    elif choice=="10":
+
+    elif choice == "10":
         delete_task()
-    elif choice=="11":
+
+    elif choice == "11":
         save_data()
         print("Data saved to subjects.json.")
         print("Thank you for using the study assistant.")
         break
+
     else:
         print("Invalid choice. Please try again.")
-    
-
-
-
