@@ -20,6 +20,20 @@ def load_data():
 
 load_data()
 
+def find_subject_key(subject_name):
+    for subject in subjects:
+        if subject_name.lower() == subject.lower():
+            return subject
+    
+    return None
+
+def find_topic_key(subject_name, topic_name):
+    for topic in subjects[subject_name]:
+        if topic_name.lower() == topic.lower():
+            return topic
+
+    return None
+
 
 def display_menu():
     print("\n===============================")
@@ -38,6 +52,7 @@ def display_menu():
     print("11. Exit")
 
 
+
 def add_subject():
     subject_name = input("Enter the subject name: ").strip()
 
@@ -45,13 +60,13 @@ def add_subject():
         print("Subject name cannot be empty.")
         return
 
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            print("Subject already exists.")
-            return
+    existing_subject = find_subject_key(subject_name)
+
+    if existing_subject is not None:
+        print("Subject already exists.")
+        return
 
     subjects[subject_name] = {}
-
     print(f"{subject_name} added successfully!")
 
 
@@ -67,17 +82,11 @@ def view_subjects():
 
 
 def add_topic():
-    subject_name = input(
-        "Enter the subject name to add a topic: "
-    ).strip()
+    subject_name = input("Enter the subject name to add a topic: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
-
-    if subject_name not in subjects:
+    subject_name=find_subject_key(subject_name)
+    
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
@@ -102,17 +111,11 @@ def add_topic():
 
 
 def view_topics():
-    subject_name = input(
-        "Enter the subject name to view topics: "
-    ).strip()
+    subject_name = input("Enter the subject name to view topics: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name=find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
@@ -129,33 +132,22 @@ def view_topics():
 
 
 def add_task():
-    subject_name = input(
-        "Enter the subject name to add a task: "
-    ).strip()
+    subject_name = input("Enter the subject name to add a task: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name=find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
-    topic_name = input(
-        "Enter the topic name to add a task: "
-    ).strip()
+    topic_name = input("Enter the topic name to add a task: ").strip()
 
-    # Find the actual topic key, ignoring case
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            topic_name = topic
-            break
+    topic_name = find_topic_key(subject_name, topic_name)
 
-    if topic_name not in subjects[subject_name]:
+    if topic_name is None:
         print("Topic not found. Please add the topic first.")
         return
+
 
     task_name = input("Enter the task name: ").strip()
 
@@ -184,17 +176,11 @@ def add_task():
 
 
 def view_tasks():
-    subject_name = input(
-        "Enter the subject name to view tasks: "
-    ).strip()
+    subject_name = input("Enter the subject name to view tasks: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name = find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
@@ -235,26 +221,18 @@ def mark_task_completed():
     ).strip()
 
     # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name = find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
-    topic_name = input(
-        "Enter the topic name: "
-    ).strip()
+    topic_name = input("Enter the topic name: ").strip()
 
     # Find the actual topic key, ignoring case
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            topic_name = topic
-            break
-
-    if topic_name not in subjects[subject_name]:
+    topic_name = find_topic_key(subject_name, topic_name)
+    
+    if topic_name is None:
         print("Topic not found. Please add the topic first.")
         return
 
@@ -296,17 +274,11 @@ def mark_task_completed():
 
 
 def delete_subject():
-    subject_name = input(
-        "Enter the subject name to delete: "
-    ).strip()
+    subject_name = input("Enter the subject name to delete: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name = find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
@@ -319,31 +291,22 @@ def delete_subject():
 
 
 def delete_topic():
-    subject_name = input(
-        "Enter the subject name to delete a topic: "
-    ).strip()
+    subject_name = input("Enter the subject name to delete a topic: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name = find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
-    topic_name = input(
-        "Enter the topic name to delete: "
-    ).strip()
+    topic_name = input("Enter the topic name to delete: ").strip()
+    
+    if topic_name == "":
+        print("Topic name cannot be empty.")
+        return
+    topic_name = find_topic_key(subject_name, topic_name)
 
-    # Find the actual topic key, ignoring case
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            topic_name = topic
-            break
-
-    if topic_name not in subjects[subject_name]:
+    if topic_name is None:
         print("Topic not found. Please add the topic first.")
         return
 
@@ -356,37 +319,24 @@ def delete_topic():
 
 
 def delete_task():
-    subject_name = input(
-        "Enter the subject name to delete a task: "
-    ).strip()
+    subject_name = input("Enter the subject name to delete a task: ").strip()
 
-    # Find the actual subject key, ignoring case
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            subject_name = subject
-            break
+    subject_name = find_subject_key(subject_name)
 
-    if subject_name not in subjects:
+    if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
-    topic_name = input(
-        "Enter the topic name to delete a task: "
-    ).strip()
 
-    # Find the actual topic key, ignoring case
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            topic_name = topic
-            break
+    topic_name = input("Enter the topic name to delete a task: ").strip()
 
-    if topic_name not in subjects[subject_name]:
+    topic_name = find_topic_key(subject_name, topic_name)
+
+    if topic_name is None:
         print("Topic not found. Please add the topic first.")
         return
 
-    task_name = input(
-        "Enter the task name to delete: "
-    ).strip()
+    task_name = input("Enter the task name to delete: ").strip()
     
     if task_name == "":
         print("Task name cannot be empty.")
@@ -408,6 +358,7 @@ def delete_task():
     print(
         f"Task '{task_name}' not found in topic '{topic_name}'."
     )
+
 
 
 while True:
