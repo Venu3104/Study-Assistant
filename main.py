@@ -49,7 +49,8 @@ def display_menu():
     print("8. Delete Subject")
     print("9. Delete Topic")
     print("10. Delete Task")
-    print("11. Exit")
+    print("11. View Study Progress")
+    print("12. Exit")
 
 
 
@@ -360,6 +361,40 @@ def delete_task():
     )
 
 
+def view_study_progress():
+    total_subjects = len(subjects)
+    total_topics = 0
+    total_tasks = 0
+    completed_tasks = 0
+
+    for subject in subjects:
+        topics = subjects[subject]
+        total_topics += len(topics)
+
+        for topic in topics:
+            tasks = topics[topic]
+            total_tasks += len(tasks)
+
+            for task in tasks:
+                if task["completed"]:
+                    completed_tasks += 1
+
+    pending_tasks = total_tasks - completed_tasks
+
+    if total_tasks > 0:
+        progress_percentage = (completed_tasks / total_tasks) * 100
+    else:
+        progress_percentage = 0
+
+    print("\n========== STUDY PROGRESS ==========")
+    print(f"Total Subjects       : {total_subjects}")
+    print(f"Total Topics         : {total_topics}")
+    print(f"Total Tasks          : {total_tasks}")
+    print(f"Completed Tasks      : {completed_tasks}")
+    print(f"Pending Tasks        : {pending_tasks}")
+    print(f"Overall Progress     : {progress_percentage:.2f}%")
+    print("====================================")
+
 
 while True:
     display_menu()
@@ -395,8 +430,11 @@ while True:
 
     elif choice == "10":
         delete_task()
-
+        
     elif choice == "11":
+        view_study_progress()
+
+    elif choice == "12":
         save_data()
         print("Data saved to subjects.json.")
         print("Thank you for using the study assistant.")

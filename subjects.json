@@ -1,27 +1,30 @@
 {
     "python": {
-        "oops": [
+        "functions": [
             {
-                "name": "inheritance",
-                "completed": false
-            },
-            {
-                "name": "abstraction",
+                "name": "variable func",
                 "completed": true
-            },
-            {
-                "name": "polymorphism",
-                "completed": false
             }
         ]
     },
-    "Java": {
-        "Oops": [
+    "java": {
+        "oops": [
             {
-                "name": "ClassEs and ObjecTS",
-                "completed": false
+                "name": "class",
+                "completed": true
+            },
+            {
+                "name": "encapsulation",
+                "completed": true
             }
-        ],
-        "inheritance": []
+        ]
+    },
+    "c++": {
+        "exceptions": [
+            {
+                "name": "compile-time exc",
+                "completed": true
+            }
+        ]
     }
 }
