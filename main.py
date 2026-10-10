@@ -50,7 +50,8 @@ def display_menu():
     print("9. Delete Topic")
     print("10. Delete Task")
     print("11. View Study Progress")
-    print("12. Exit")
+    print("12. View Subject-wise Progress")
+    print("13. Exit")
 
 
 
@@ -394,6 +395,76 @@ def view_study_progress():
     print(f"Pending Tasks        : {pending_tasks}")
     print(f"Overall Progress     : {progress_percentage:.2f}%")
     print("====================================")
+    
+
+def view_subject_progress():
+    if not subjects:
+        print("\nNo subjects available. Add a subject first.")
+        return
+
+    print("\n========== SUBJECT-WISE PROGRESS ==========")
+
+    for subject in subjects:
+        topics = subjects[subject]
+
+        total_tasks = 0
+        completed_tasks = 0
+
+        # Calculate subject-wise progress
+        for topic in topics:
+            tasks = topics[topic]
+
+            total_tasks += len(tasks)
+
+            for task in tasks:
+                if task["completed"]:
+                    completed_tasks += 1
+
+        pending_tasks = total_tasks - completed_tasks
+
+        if total_tasks > 0:
+            progress = (completed_tasks / total_tasks) * 100
+        else:
+            progress = 0
+
+        print(f"\nSubject: {subject}")
+        print(f"Total Tasks     : {total_tasks}")
+        print(f"Completed Tasks : {completed_tasks}")
+        print(f"Pending Tasks   : {pending_tasks}")
+        print(f"Progress        : {progress:.2f}%")
+
+        # Calculate topic-wise progress
+        print("\n  Topic-wise Progress:")
+
+        if not topics:
+            print("  No topics available.")
+            continue
+
+        for topic in topics:
+            tasks = topics[topic]
+            topic_total = len(tasks)
+            topic_completed = 0
+
+            for task in tasks:
+                if task["completed"]:
+                    topic_completed += 1
+
+            if topic_total > 0:
+                topic_progress = (
+                    topic_completed / topic_total
+                ) * 100
+            else:
+                topic_progress = 0
+
+            print(
+                f"  {topic}: "
+                f"{topic_completed}/{topic_total} tasks completed "
+                f"({topic_progress:.2f}%)"
+            )
+
+    print("\n===========================================")
+
+    
 
 
 while True:
@@ -433,8 +504,11 @@ while True:
         
     elif choice == "11":
         view_study_progress()
-
+        
     elif choice == "12":
+        view_subject_progress()
+
+    elif choice == "13":
         save_data()
         print("Data saved to subjects.json.")
         print("Thank you for using the study assistant.")
