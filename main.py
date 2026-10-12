@@ -1,39 +1,11 @@
-import json
 from datetime import datetime, date
+from progress import view_study_progress,view_subject_progress
+from storage import save_data,load_data
+from subjects import(add_subject,view_subjects,delete_subject,find_subject_key)
+from topics import(add_topic,view_topics,delete_topic,find_topic_key)
+from tasks import(add_task,view_tasks,mark_task_completed,view_deadline_tasks,delete_task)
 
-subjects = {}
-
-
-def save_data():
-    with open("subjects.json", "w") as file:
-        json.dump(subjects, file, indent=4)
-
-
-def load_data():
-    global subjects
-
-    try:
-        with open("subjects.json", "r") as file:
-            subjects = json.load(file)
-    except FileNotFoundError:
-        subjects = {}
-
-
-load_data()
-
-def find_subject_key(subject_name):
-    for subject in subjects:
-        if subject_name.lower() == subject.lower():
-            return subject
-    
-    return None
-
-def find_topic_key(subject_name, topic_name):
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            return topic
-
-    return None
+subjects = load_data()
 
 
 def display_menu():
@@ -53,514 +25,7 @@ def display_menu():
     print("11. View Study Progress")
     print("12. View Subject-wise Progress")
     print("13. View Overdue/Upcoming Tasks")
-    print("14. Exit")
-
-
-
-def add_subject():
-    subject_name = input("Enter the subject name: ").strip()
-
-    if subject_name == "":
-        print("Subject name cannot be empty.")
-        return
-
-    existing_subject = find_subject_key(subject_name)
-
-    if existing_subject is not None:
-        print("Subject already exists.")
-        return
-
-    subjects[subject_name] = {}
-    print(f"{subject_name} added successfully!")
-
-
-def view_subjects():
-    if not subjects:
-        print("No subjects added yet.")
-        return
-
-    print("\nYour Subjects:")
-
-    for index, subject in enumerate(subjects, start=1):
-        print(f"{index}. {subject}")
-
-
-def add_topic():
-    subject_name = input("Enter the subject name to add a topic: ").strip()
-
-    subject_name=find_subject_key(subject_name)
-    
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topic_name = input("Enter the topic name: ").strip()
-
-    if topic_name == "":
-        print("Topic name cannot be empty.")
-        return
-
-    # Check for duplicate topic, ignoring case
-    for topic in subjects[subject_name]:
-        if topic_name.lower() == topic.lower():
-            print("Topic already exists in this subject. Please enter a new topic name.")
-            return
-
-    subjects[subject_name][topic_name] = []
-
-    print(
-        f"Topic '{topic_name}' added to subject "
-        f"'{subject_name}' successfully!"
-    )
-
-
-def view_topics():
-    subject_name = input("Enter the subject name to view topics: ").strip()
-
-    subject_name=find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topics = subjects[subject_name]
-
-    if not topics:
-        print(f"No topics have been added for subject '{subject_name}'.")
-        return
-
-    print(f"\nTopics for subject '{subject_name}':")
-
-    for index, topic in enumerate(topics, start=1):
-        print(f"{index}. {topic}")
-
-
-
-
-def add_task():
-    subject_name = input("Enter the subject name to add a task: ").strip()
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topic_name = input("Enter the topic name to add a task: ").strip()
-    topic_name = find_topic_key(subject_name, topic_name)
-
-    if topic_name is None:
-        print("Topic not found. Please add the topic first.")
-        return
-
-    task_name = input("Enter the task name: ").strip()
-
-    if task_name == "":
-        print("Task name cannot be empty.")
-        return
-
-    # Check for duplicate task, ignoring case
-    for task in subjects[subject_name][topic_name]:
-        if task["name"].lower() == task_name.lower():
-            print("Task already exists in this topic.")
-            return
-
-    # Get and validate priority
-    priority = input("Enter priority (High/Medium/Low): ").strip().capitalize()
-
-    if priority not in ["High", "Medium", "Low"]:
-        print("Invalid priority. Choose High, Medium, or Low.")
-        return
-
-    # Get and validate optional due date
-    due_date = input(
-        "Enter due date (YYYY-MM-DD), or press Enter to skip: "
-    ).strip()
-
-    if due_date:
-        try:
-            parsed_date = datetime.strptime(
-                due_date, "%Y-%m-%d"
-            ).date()
-
-            if parsed_date.strftime("%Y-%m-%d") != due_date:
-                raise ValueError
-
-        except ValueError:
-            print(
-                "Invalid date. Use YYYY-MM-DD, "
-                "for example 2026-12-25."
-            )
-            return
-
-    # Save the new task
-    new_task = {
-        "name": task_name,
-        "completed": False,
-        "priority": priority,
-        "due_date": due_date
-    }
-
-    subjects[subject_name][topic_name].append(new_task)
-
-    print(f"Task '{task_name}' added successfully!")
-    print(f"Priority: {priority}")
-
-    if due_date:
-        print(f"Due date: {due_date}")
-    else:
-        print("Due date: Not set")
-
-
-
-
-def view_tasks():
-    subject_name = input("Enter the subject name to view tasks: ").strip()
-
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topics = subjects[subject_name]
-
-    if not topics:
-        print(f"No topics have been added for '{subject_name}'.")
-        return
-
-    print(f"\nTasks for subject '{subject_name}':")
-
-    for topic, tasks in topics.items():
-        print(f"\nTopic: {topic}")
-
-        if not tasks:
-            print("  No tasks added yet.")
-            continue
-
-        for index, task in enumerate(tasks, start=1):
-            status = (
-                "Completed"
-                if task["completed"]
-                else "Not Completed"
-            )
-
-            # Defaults keep older saved tasks compatible
-            priority = task.get("priority", "Medium")
-            due_date = task.get("due_date", "")
-
-            print(f"  {index}. {task['name']}")
-            print(f"     Status   : {status}")
-            print(f"     Priority : {priority}")
-            print(f"     Due date : {due_date or 'Not set'}")
-            
-            
-
-def view_deadline_tasks():
-    today = date.today()
-
-    overdue_tasks = []
-    upcoming_tasks = []
-
-    for subject, topics in subjects.items():
-        for topic, tasks in topics.items():
-            for task in tasks:
-                due_date = task.get("due_date", "")
-
-                # Ignore tasks without a deadline or already completed
-                if not due_date or task.get("completed", False):
-                    continue
-
-                try:
-                    deadline = datetime.strptime(
-                        due_date, "%Y-%m-%d"
-                    ).date()
-                except ValueError:
-                    continue
-
-                task_details = (
-                    f"{task['name']} | "
-                    f"Subject: {subject} | "
-                    f"Topic: {topic} | "
-                    f"Priority: {task.get('priority', 'Medium')} | "
-                    f"Due: {due_date}"
-                )
-
-                if deadline < today:
-                    overdue_tasks.append((deadline, task_details))
-                else:
-                    upcoming_tasks.append((deadline, task_details))
-
-    # Sort tasks by their deadline
-    overdue_tasks.sort(key=lambda item: item[0])
-    upcoming_tasks.sort(key=lambda item: item[0])
-
-    print("\n========== OVERDUE TASKS ==========")
-
-    if overdue_tasks:
-        for _, details in overdue_tasks:
-            print(details)
-    else:
-        print("No overdue tasks.")
-
-    print("\n======= UPCOMING / DUE TODAY =======")
-
-    if upcoming_tasks:
-        for _, details in upcoming_tasks:
-            print(details)
-    else:
-        print("No upcoming tasks.")
-
-    print("====================================")
-
-
-
-
-def mark_task_completed():
-    subject_name = input("Enter the subject name: ").strip()
-
-    # Find the actual subject key, ignoring case
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topic_name = input("Enter the topic name: ").strip()
-
-    # Find the actual topic key, ignoring case
-    topic_name = find_topic_key(subject_name, topic_name)
-    
-    if topic_name is None:
-        print("Topic not found. Please add the topic first.")
-        return
-
-    tasks = subjects[subject_name][topic_name]
-
-    if not tasks:
-        print("No tasks have been added to this topic.")
-        return
-
-    print(f"\nTasks for topic '{topic_name}':")
-
-    for index, task in enumerate(tasks, start=1):
-
-        if task["completed"]:
-            status = "Completed"
-        else:
-            status = "Not Completed"
-
-        print(f"{index}. {task['name']} - {status}")
-
-    try:
-        task_number = int(
-            input("Enter the task number to mark as completed: ")
-        )
-    except ValueError:
-        print("Please enter a valid task number.")
-        return
-
-    if task_number < 1 or task_number > len(tasks):
-        print("Invalid task number. Please enter a valid task number.")
-        return
-
-    tasks[task_number - 1]["completed"] = True
-
-    print(
-        f"Task '{tasks[task_number - 1]['name']}' "
-        f"marked as completed!"
-    )
-
-
-def delete_subject():
-    subject_name = input("Enter the subject name to delete: ").strip()
-
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    subjects.pop(subject_name)
-
-    print(
-        f"Subject '{subject_name}' and all its topics "
-        f"and tasks have been deleted successfully!"
-    )
-
-
-def delete_topic():
-    subject_name = input("Enter the subject name to delete a topic: ").strip()
-
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-    topic_name = input("Enter the topic name to delete: ").strip()
-    
-    if topic_name == "":
-        print("Topic name cannot be empty.")
-        return
-    topic_name = find_topic_key(subject_name, topic_name)
-
-    if topic_name is None:
-        print("Topic not found. Please add the topic first.")
-        return
-
-    subjects[subject_name].pop(topic_name)
-
-    print(
-        f"Topic '{topic_name}' and all its tasks have been "
-        f"deleted successfully from subject '{subject_name}'!"
-    )
-
-
-def delete_task():
-    subject_name = input("Enter the subject name to delete a task: ").strip()
-
-    subject_name = find_subject_key(subject_name)
-
-    if subject_name is None:
-        print("Subject not found. Please add the subject first.")
-        return
-
-
-    topic_name = input("Enter the topic name to delete a task: ").strip()
-
-    topic_name = find_topic_key(subject_name, topic_name)
-
-    if topic_name is None:
-        print("Topic not found. Please add the topic first.")
-        return
-
-    task_name = input("Enter the task name to delete: ").strip()
-    
-    if task_name == "":
-        print("Task name cannot be empty.")
-        return
-
-    tasks = subjects[subject_name][topic_name]
-
-    for task in tasks:
-        if task["name"].lower() == task_name.lower():
-            tasks.remove(task)
-
-            print(
-                f"Task '{task_name}' has been deleted successfully "
-                f"from topic '{topic_name}' in subject "
-                f"'{subject_name}'!"
-            )
-            return
-
-    print(
-        f"Task '{task_name}' not found in topic '{topic_name}'."
-    )
-
-
-def view_study_progress():
-    total_subjects = len(subjects)
-    total_topics = 0
-    total_tasks = 0
-    completed_tasks = 0
-
-    for subject in subjects:
-        topics = subjects[subject]
-        total_topics += len(topics)
-
-        for topic in topics:
-            tasks = topics[topic]
-            total_tasks += len(tasks)
-
-            for task in tasks:
-                if task["completed"]:
-                    completed_tasks += 1
-
-    pending_tasks = total_tasks - completed_tasks
-
-    if total_tasks > 0:
-        progress_percentage = (completed_tasks / total_tasks) * 100
-    else:
-        progress_percentage = 0
-
-    print("\n========== STUDY PROGRESS ==========")
-    print(f"Total Subjects       : {total_subjects}")
-    print(f"Total Topics         : {total_topics}")
-    print(f"Total Tasks          : {total_tasks}")
-    print(f"Completed Tasks      : {completed_tasks}")
-    print(f"Pending Tasks        : {pending_tasks}")
-    print(f"Overall Progress     : {progress_percentage:.2f}%")
-    print("====================================")
-    
-
-def view_subject_progress():
-    if not subjects:
-        print("\nNo subjects available. Add a subject first.")
-        return
-
-    print("\n========== SUBJECT-WISE PROGRESS ==========")
-
-    for subject in subjects:
-        topics = subjects[subject]
-
-        total_tasks = 0
-        completed_tasks = 0
-
-        # Calculate subject-wise progress
-        for topic in topics:
-            tasks = topics[topic]
-
-            total_tasks += len(tasks)
-
-            for task in tasks:
-                if task["completed"]:
-                    completed_tasks += 1
-
-        pending_tasks = total_tasks - completed_tasks
-
-        if total_tasks > 0:
-            progress = (completed_tasks / total_tasks) * 100
-        else:
-            progress = 0
-
-        print(f"\nSubject: {subject}")
-        print(f"Total Tasks     : {total_tasks}")
-        print(f"Completed Tasks : {completed_tasks}")
-        print(f"Pending Tasks   : {pending_tasks}")
-        print(f"Progress        : {progress:.2f}%")
-
-        # Calculate topic-wise progress
-        print("\n  Topic-wise Progress:")
-
-        if not topics:
-            print("  No topics available.")
-            continue
-
-        for topic in topics:
-            tasks = topics[topic]
-            topic_total = len(tasks)
-            topic_completed = 0
-
-            for task in tasks:
-                if task["completed"]:
-                    topic_completed += 1
-
-            if topic_total > 0:
-                topic_progress = (
-                    topic_completed / topic_total
-                ) * 100
-            else:
-                topic_progress = 0
-
-            print(
-                f"  {topic}: "
-                f"{topic_completed}/{topic_total} tasks completed "
-                f"({topic_progress:.2f}%)"
-            )
-
-    print("\n===========================================")
-
-    
+    print("14. Exit")  
 
 
 while True:
@@ -569,47 +34,46 @@ while True:
     choice = input("Enter your choice: ").strip()
 
     if choice == "1":
-        add_subject()
+        add_subject(subjects)
 
     elif choice == "2":
-        view_subjects()
+        view_subjects(subjects)
 
     elif choice == "3":
-        add_topic()
+        add_topic(subjects)
 
     elif choice == "4":
-        view_topics()
+        view_topics(subjects)
 
     elif choice == "5":
-        add_task()
+        add_task(subjects)
 
     elif choice == "6":
-        view_tasks()
+        view_tasks(subjects)
 
     elif choice == "7":
-        mark_task_completed()
+        mark_task_completed(subjects)
 
     elif choice == "8":
-        delete_subject()
+        delete_subject(subjects)
 
     elif choice == "9":
-        delete_topic()
+        delete_topic(subjects)
 
     elif choice == "10":
-        delete_task()
+        delete_task(subjects)
         
     elif choice == "11":
-        view_study_progress()
+        view_study_progress(subjects)
         
     elif choice == "12":
-        view_subject_progress()
+        view_subject_progress(subjects)
         
     elif choice == "13":
-        view_deadline_tasks()
+        view_deadline_tasks(subjects)
 
     elif choice == "14":
-        save_data()
-        print("Data saved to subjects.json.")
+        save_data(subjects)
         print("Thank you for using the study assistant.")
         break
 
