@@ -4,6 +4,30 @@
             {
                 "name": "variable func",
                 "completed": true
+            },
+            {
+                "name": "collections",
+                "completed": true,
+                "priority": "High",
+                "due_date": "2026-9-12"
+            },
+            {
+                "name": "collection",
+                "completed": true,
+                "priority": "Low",
+                "due_date": "2026-10-11"
+            },
+            {
+                "name": "exceptions",
+                "completed": false,
+                "priority": "High",
+                "due_date": "2026-12-25"
+            },
+            {
+                "name": "files",
+                "completed": false,
+                "priority": "Medium",
+                "due_date": "2025-12-25"
             }
         ]
     },

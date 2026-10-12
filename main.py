@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, date
 
 subjects = {}
 
@@ -51,7 +52,8 @@ def display_menu():
     print("10. Delete Task")
     print("11. View Study Progress")
     print("12. View Subject-wise Progress")
-    print("13. Exit")
+    print("13. View Overdue/Upcoming Tasks")
+    print("14. Exit")
 
 
 
@@ -133,23 +135,22 @@ def view_topics():
         print(f"{index}. {topic}")
 
 
+
+
 def add_task():
     subject_name = input("Enter the subject name to add a task: ").strip()
-
-    subject_name=find_subject_key(subject_name)
+    subject_name = find_subject_key(subject_name)
 
     if subject_name is None:
         print("Subject not found. Please add the subject first.")
         return
 
     topic_name = input("Enter the topic name to add a task: ").strip()
-
     topic_name = find_topic_key(subject_name, topic_name)
 
     if topic_name is None:
         print("Topic not found. Please add the topic first.")
         return
-
 
     task_name = input("Enter the task name: ").strip()
 
@@ -160,21 +161,56 @@ def add_task():
     # Check for duplicate task, ignoring case
     for task in subjects[subject_name][topic_name]:
         if task["name"].lower() == task_name.lower():
+            print("Task already exists in this topic.")
+            return
+
+    # Get and validate priority
+    priority = input("Enter priority (High/Medium/Low): ").strip().capitalize()
+
+    if priority not in ["High", "Medium", "Low"]:
+        print("Invalid priority. Choose High, Medium, or Low.")
+        return
+
+    # Get and validate optional due date
+    due_date = input(
+        "Enter due date (YYYY-MM-DD), or press Enter to skip: "
+    ).strip()
+
+    if due_date:
+        try:
+            parsed_date = datetime.strptime(
+                due_date, "%Y-%m-%d"
+            ).date()
+
+            if parsed_date.strftime("%Y-%m-%d") != due_date:
+                raise ValueError
+
+        except ValueError:
             print(
-                "Task already exists in the topic. "
-                "Please enter a new task name."
+                "Invalid date. Use YYYY-MM-DD, "
+                "for example 2026-12-25."
             )
             return
 
-    subjects[subject_name][topic_name].append({
+    # Save the new task
+    new_task = {
         "name": task_name,
-        "completed": False
-    })
+        "completed": False,
+        "priority": priority,
+        "due_date": due_date
+    }
 
-    print(
-        f"Task '{task_name}' added to topic '{topic_name}' "
-        f"in subject '{subject_name}' successfully"
-    )
+    subjects[subject_name][topic_name].append(new_task)
+
+    print(f"Task '{task_name}' added successfully!")
+    print(f"Priority: {priority}")
+
+    if due_date:
+        print(f"Due date: {due_date}")
+    else:
+        print("Due date: Not set")
+
+
 
 
 def view_tasks():
@@ -189,38 +225,98 @@ def view_tasks():
     topics = subjects[subject_name]
 
     if not topics:
-        print(f"No topics have been added for subject '{subject_name}'.")
+        print(f"No topics have been added for '{subject_name}'.")
         return
 
-    print(f"\nTopics for subject '{subject_name}':")
+    print(f"\nTasks for subject '{subject_name}':")
 
-    for index, topic in enumerate(topics, start=1):
-        print(f"{index}. {topic}")
-
-        tasks = topics[topic]
+    for topic, tasks in topics.items():
+        print(f"\nTopic: {topic}")
 
         if not tasks:
-            print(f"  No tasks have been added for topic '{topic}'.")
-        else:
-            print(f"  Tasks for topic '{topic}':")
+            print("  No tasks added yet.")
+            continue
 
-            for task_index, task in enumerate(tasks, start=1):
+        for index, task in enumerate(tasks, start=1):
+            status = (
+                "Completed"
+                if task["completed"]
+                else "Not Completed"
+            )
 
-                if task["completed"]:
-                    status = "Completed"
-                else:
-                    status = "Not Completed"
+            # Defaults keep older saved tasks compatible
+            priority = task.get("priority", "Medium")
+            due_date = task.get("due_date", "")
 
-                print(
-                    f"    {task_index}. "
-                    f"{task['name']} - {status}"
+            print(f"  {index}. {task['name']}")
+            print(f"     Status   : {status}")
+            print(f"     Priority : {priority}")
+            print(f"     Due date : {due_date or 'Not set'}")
+            
+            
+
+def view_deadline_tasks():
+    today = date.today()
+
+    overdue_tasks = []
+    upcoming_tasks = []
+
+    for subject, topics in subjects.items():
+        for topic, tasks in topics.items():
+            for task in tasks:
+                due_date = task.get("due_date", "")
+
+                # Ignore tasks without a deadline or already completed
+                if not due_date or task.get("completed", False):
+                    continue
+
+                try:
+                    deadline = datetime.strptime(
+                        due_date, "%Y-%m-%d"
+                    ).date()
+                except ValueError:
+                    continue
+
+                task_details = (
+                    f"{task['name']} | "
+                    f"Subject: {subject} | "
+                    f"Topic: {topic} | "
+                    f"Priority: {task.get('priority', 'Medium')} | "
+                    f"Due: {due_date}"
                 )
+
+                if deadline < today:
+                    overdue_tasks.append((deadline, task_details))
+                else:
+                    upcoming_tasks.append((deadline, task_details))
+
+    # Sort tasks by their deadline
+    overdue_tasks.sort(key=lambda item: item[0])
+    upcoming_tasks.sort(key=lambda item: item[0])
+
+    print("\n========== OVERDUE TASKS ==========")
+
+    if overdue_tasks:
+        for _, details in overdue_tasks:
+            print(details)
+    else:
+        print("No overdue tasks.")
+
+    print("\n======= UPCOMING / DUE TODAY =======")
+
+    if upcoming_tasks:
+        for _, details in upcoming_tasks:
+            print(details)
+    else:
+        print("No upcoming tasks.")
+
+    print("====================================")
+
+
 
 
 def mark_task_completed():
-    subject_name = input(
-        "Enter the subject name: "
-    ).strip()
+    subject_name = input("Enter the subject name: ").strip()
 
     # Find the actual subject key, ignoring case
     subject_name = find_subject_key(subject_name)
@@ -507,8 +603,11 @@ while True:
         
     elif choice == "12":
         view_subject_progress()
-
+        
     elif choice == "13":
+        view_deadline_tasks()
+
+    elif choice == "14":
         save_data()
         print("Data saved to subjects.json.")
         print("Thank you for using the study assistant.")
