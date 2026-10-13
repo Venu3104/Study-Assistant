@@ -4,6 +4,7 @@ from storage import save_data,load_data
 from subjects import(add_subject,view_subjects,delete_subject,find_subject_key)
 from topics import(add_topic,view_topics,delete_topic,find_topic_key)
 from tasks import(add_task,view_tasks,mark_task_completed,view_deadline_tasks,delete_task)
+from search import filter_tasks_by_status, search_and_filter_menu
 
 subjects = load_data()
 
@@ -25,7 +26,8 @@ def display_menu():
     print("11. View Study Progress")
     print("12. View Subject-wise Progress")
     print("13. View Overdue/Upcoming Tasks")
-    print("14. Exit")  
+    print("14. Search Tasks by Name")
+    print("15. Exit")  
 
 
 while True:
@@ -73,6 +75,9 @@ while True:
         view_deadline_tasks(subjects)
 
     elif choice == "14":
+        search_and_filter_menu(subjects)    
+
+    elif choice == "15":
         save_data(subjects)
         print("Thank you for using the study assistant.")
         break
