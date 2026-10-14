@@ -35,12 +35,14 @@
     "java": {
         "oops": [
             {
-                "name": "class",
+                "name": "Classes and Objects",
                 "completed": true
             },
             {
-                "name": "encapsulation",
-                "completed": true
+                "name": "Encapsulation",
+                "completed": true,
+                "priority": "Low",
+                "due_date": "2026-11-10"
             }
         ]
     },

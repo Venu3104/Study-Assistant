@@ -276,3 +276,121 @@ def mark_task_completed(subjects):
         f"marked as completed!"
     )
 
+
+def edit_task(subjects):
+    subject_name = input("Enter the subject name: ").strip()
+    subject_name = find_subject_key(subjects, subject_name)
+
+    if subject_name is None:
+        print("Subject not found.")
+        return
+
+    topic_name = input("Enter the topic name: ").strip()
+    topic_name = find_topic_key(subjects, subject_name, topic_name)
+
+    if topic_name is None:
+        print("Topic not found.")
+        return
+
+    tasks = subjects[subject_name][topic_name]
+
+    if not tasks:
+        print("No tasks available in this topic.")
+        return
+
+    print(f"\nTasks in topic '{topic_name}':")
+
+    for index, task in enumerate(tasks, start=1):
+        print(f"{index}. {task['name']}")
+
+    try:
+        task_number = int(input("Enter the task number to edit: "))
+    except ValueError:
+        print("Please enter a valid task number.")
+        return
+
+    if task_number < 1 or task_number > len(tasks):
+        print("Invalid task number.")
+        return
+
+    selected_task = tasks[task_number - 1]
+
+    while True:
+        print("\n========== EDIT TASK ==========")
+        print(f"Task: {selected_task['name']}")
+        print("1. Rename task")
+        print("2. Change priority")
+        print("3. Change deadline")
+        print("4. Return")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            new_name = input("Enter the new task name: ").strip()
+
+            if not new_name:
+                print("Task name cannot be empty.")
+                continue
+
+            duplicate = False
+
+            for index, task in enumerate(tasks):
+                if (
+                    index != task_number - 1
+                    and task["name"].lower() == new_name.lower()
+                ):
+                    duplicate = True
+                    break
+
+            if duplicate:
+                print("A task with this name already exists.")
+                continue
+
+            old_name = selected_task["name"]
+            selected_task["name"] = new_name
+            print(f"Task renamed from '{old_name}' to '{new_name}'.")
+
+        elif choice == "2":
+            priority = input(
+                "Enter priority (High/Medium/Low): "
+            ).strip().capitalize()
+
+            if priority not in ["High", "Medium", "Low"]:
+                print("Invalid priority. Choose High, Medium, or Low.")
+                continue
+
+            selected_task["priority"] = priority
+            print(f"Priority updated to {priority}.")
+
+        elif choice == "3":
+            due_date = input(
+                "Enter new deadline (YYYY-MM-DD), "
+                "or press Enter to clear it: "
+            ).strip()
+
+            if due_date:
+                try:
+                    parsed_date = datetime.strptime(
+                        due_date, "%Y-%m-%d"
+                    ).date()
+
+                    if parsed_date.strftime("%Y-%m-%d") != due_date:
+                        raise ValueError
+
+                except ValueError:
+                    print("Invalid date. Use YYYY-MM-DD.")
+                    continue
+
+            selected_task["due_date"] = due_date
+
+            if due_date:
+                print(f"Deadline updated to {due_date}.")
+            else:
+                print("Deadline cleared.")
+
+        elif choice == "4":
+            print("Returning from task editing.")
+            break
+
+        else:
+            print("Invalid choice. Please choose 1, 2, 3, or 4.")
