@@ -394,3 +394,105 @@ def edit_task(subjects):
 
         else:
             print("Invalid choice. Please choose 1, 2, 3, or 4.")
+
+
+def sort_tasks(subjects):
+    subject_name = input("Enter the subject name: ").strip()
+    subject_name = find_subject_key(subjects, subject_name)
+
+    if subject_name is None:
+        print("Subject not found.")
+        return
+
+    topic_name = input("Enter the topic name: ").strip()
+    topic_name = find_topic_key(subjects, subject_name, topic_name)
+
+    if topic_name is None:
+        print("Topic not found.")
+        return
+
+    tasks = subjects[subject_name][topic_name]
+
+    if not tasks:
+        print("No tasks available in this topic.")
+        return
+
+    while True:
+        print("\n========== SORT TASKS ==========")
+        print("1. Sort by name (A-Z)")
+        print("2. Sort by priority")
+        print("3. Sort by deadline")
+        print("4. Sort by completion status")
+        print("5. Return")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            sorted_tasks = sorted(
+                tasks,
+                key=lambda task: task["name"].lower()
+            )
+            title = "Name (A-Z)"
+
+        elif choice == "2":
+            priority_order = {
+                "High": 1,
+                "Medium": 2,
+                "Low": 3
+            }
+
+            sorted_tasks = sorted(
+                tasks,
+                key=lambda task: priority_order.get(
+                    task.get("priority", "Medium").capitalize(),
+                    2
+                )
+            )
+            title = "Priority (High to Low)"
+
+        elif choice == "3":
+            def deadline_key(task):
+                due_date = task.get("due_date", "")
+
+                if not due_date:
+                    return (1, date.max)
+
+                try:
+                    parsed_date = datetime.strptime(
+                        due_date, "%Y-%m-%d"
+                    ).date()
+                    return (0, parsed_date)
+                except ValueError:
+                    return (1, date.max)
+
+            sorted_tasks = sorted(tasks, key=deadline_key)
+            title = "Deadline (Earliest First)"
+
+        elif choice == "4":
+            sorted_tasks = sorted(
+                tasks,
+                key=lambda task: task.get("completed", False)
+            )
+            title = "Completion Status (Pending First)"
+
+        elif choice == "5":
+            print("Returning to the previous menu.")
+            break
+
+        else:
+            print("Invalid choice. Please choose 1, 2, 3, 4, or 5.")
+            continue
+
+        print(f"\nTasks sorted by {title} in '{topic_name}':")
+
+        for index, task in enumerate(sorted_tasks, start=1):
+            status = (
+                "Completed"
+                if task.get("completed", False)
+                else "Pending"
+            )
+
+            print(f"\n{index}. {task['name']}")
+            print(f"   Status   : {status}")
+            print(f"   Priority : {task.get('priority', 'Medium')}")
+            print(f"   Deadline : {task.get('due_date') or 'Not set'}")

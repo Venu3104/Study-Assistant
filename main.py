@@ -3,7 +3,7 @@ from progress import view_study_progress,view_subject_progress
 from storage import save_data,load_data
 from subjects import(add_subject,view_subjects,delete_subject,find_subject_key)
 from topics import(add_topic,view_topics,delete_topic,find_topic_key)
-from tasks import(add_task,view_tasks,mark_task_completed,view_deadline_tasks,delete_task,edit_task)
+from tasks import(add_task,view_tasks,mark_task_completed,view_deadline_tasks,delete_task,edit_task,sort_tasks)
 from search import filter_tasks_by_status, search_and_filter_menu
 
 subjects = load_data()
@@ -28,7 +28,8 @@ def display_menu():
     print("13. View Overdue/Upcoming Tasks")
     print("14. Search Tasks by Name")
     print("15. Edit Task")
-    print("16. Exit")  
+    print("16. Sort Tasks")
+    print("17. Exit")  
 
 
 while True:
@@ -81,12 +82,17 @@ while True:
     elif choice == "15":
         edit_task(subjects)
         save_data(subjects)
-
+        
     elif choice == "16":
+        sort_tasks(subjects)
+
+    elif choice == "17":
         save_data(subjects)
         print("Thank you for using the study assistant.")
         break
 
     else:
         print("Invalid choice. Please try again.")
+        
+
 

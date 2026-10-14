@@ -24,7 +24,7 @@
                 "due_date": "2026-12-25"
             },
             {
-                "name": "files",
+                "name": "Files",
                 "completed": true,
                 "priority": "Medium",
                 "due_date": "2025-12-25"
